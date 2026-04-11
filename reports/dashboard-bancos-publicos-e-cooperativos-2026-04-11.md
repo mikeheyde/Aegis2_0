@@ -21,8 +21,8 @@ Radar ampliado com foco em sinais públicos de tecnologia, IA, conectividade, tr
 1. **Banco do Brasil** é hoje o caso mais visível de modernização de conectividade em escala, com **Claro + Huawei** em SD-WAN e ganhos operacionais relevantes.
 2. **CAIXA** combina dois vetores fortes: **pagamentos offline** para regiões remotas, com **Elo + Microsoft**, e uso de **IA** em suporte jurídico por chamada pública de startups.
 3. **BNB** aparece bem posicionado em duas frentes, **modernização física de canais** com **Tecban** e **inovação bancária** com **CESAR** em Open Finance, crédito e IA.
-4. **Sicoob** já opera um estágio mais maduro de **IA generativa corporativa**, integrada ao core bancário, com ênfase em governança e produtividade.
-5. **Banestes, Banrisul e BASA** mostram trilhas relevantes e distintas: IA generativa própria, IA responsável/DREX, e modernização digital com forte componente de inclusão e automação.
+4. **Sicoob** já opera um estágio mais maduro de **IA generativa corporativa**, integrada ao core bancário, com ênfase em governança, LGPD e produtividade.
+5. **Banestes, Banrisul, BASA e Banpará** mostram trilhas relevantes e distintas: IA generativa própria, DREX/IA responsável, modernização digital com inclusão e automação, e reforço explícito de conectividade crítica com proteção Anti-DDoS.
 
 ### Ranking estratégico de oportunidade
 - **Prioridade máxima:** Banco do Brasil, CAIXA, BNB, Sicoob
@@ -34,7 +34,7 @@ Radar ampliado com foco em sinais públicos de tecnologia, IA, conectividade, tr
 | Banco | Tema | Fato relevante | Empresas citadas | Tipo de vínculo | Impacto estratégico | Risco regulatório / controle | Prioridade |
 |---|---|---|---|---|---|---|---|
 | Banco do Brasil | Conectividade / SD-WAN | BB modernizou a conectividade de 93% das quase 5 mil agências com SD-WAN, dois links e dois roteadores por unidade, com economia mensal reportada de R$ 3,8 mi e meta de conclusão no 1T26. | Claro, Huawei | Contratação / modernização de rede | Altíssimo, backbone para canais, nuvem, resiliência e experiência figital | Alto, por criticidade operacional e continuidade de serviços | **Muito alta** |
-| Banco do Brasil | IA / pagamentos | BB e Visa realizaram primeira transação financeira agêntica no Brasil, com autenticação, tokenização e monitoramento de risco via Visa Intelligent Commerce. | Visa | Piloto / inovação transacional | Alto, inaugura trilha de commerce agêntico e novos modelos de pagamento | Alto, por segurança, autenticação e supervisão regulatória | **Muito alta** |
+| Banco do Brasil | IA / pagamentos | BB realizou com a Visa a primeira transação agêntica no Brasil em ambiente de produção controlado, com autenticação, tokenização e controles de segurança via Visa Intelligent Commerce. | Visa | Piloto / inovação transacional | Alto, inaugura trilha concreta de commerce agêntico e novos modelos de pagamento | Alto, por segurança, autenticação e supervisão regulatória | **Muito alta** |
 | CAIXA | Pagamentos / inclusão | CAIXA apresentou solução de pagamentos offline para benefícios em regiões remotas e informou testes com Agência-Barco. | Elo, Microsoft | Parceria / consórcio tecnológico | Altíssimo, inclusão financeira e capilaridade em áreas sem conectividade | Alto, por integridade transacional, fraude e reconciliação | **Muito alta** |
 | CAIXA | IA / jurídico | CAIXA abriu chamada de startups para solução de IA aplicada ao suporte jurídico, com CPSI e investimento de até R$ 1,6 mi. | Startups, ecossistema de inovação | Chamada pública / contratação inovadora | Alto, automatiza análise documental, inconsistências e fraude | Alto, por uso de IA em funções sensíveis e gestão probatória | **Muito alta** |
 | BRB | Canais / inclusão | BRB firmou parceria com a Tecban para instalar terminais compactos Banco24Horas em PB e TO, apoiando capilaridade após vencer folhas estaduais. | Tecban | Parceria operacional | Médio-alto, reforça presença física leve e atendimento regional | Médio, mais ligado a execução e disponibilidade | **Alta** |
@@ -48,7 +48,7 @@ Radar ampliado com foco em sinais públicos de tecnologia, IA, conectividade, tr
 | BASA | Plataforma digital / automação | Banco da Amazônia desenvolveu o BASA Digital com Red Hat OpenShift e Ansible, simplificando aprovação de crédito para produtores rurais em áreas remotas. | Red Hat | Modernização de plataforma | Alto, inclusão financeira, produtividade e escala digital | Médio-alto, por resiliência, segurança e dados | **Alta** |
 | BASA | Privacidade / controle | Relatório de feedback do TCU sobre LGPD para o Banco da Amazônia mostra trilha concreta de conformidade e lacunas em RIPD e mitigação de riscos. | TCU | Auditoria / benchmark de conformidade | Alto, porque pressiona maturidade de dados para expansão digital | **Muito alto** | **Alta** |
 | Banpará | Cloud / produtividade / capacitação | Banpará publicou pregão e contrato ativo de R$ 39,65 mi com a Brasoftware para licenças Microsoft, Azure, segurança e treinamentos oficiais. | Microsoft, Brasoftware | Licitação / contrato de TI | Médio-alto, moderniza stack de produtividade, nuvem e segurança | Alto, por execução contratual e dependência de plataforma | **Alta** |
-| Banpará | Transformação digital | Relatórios institucionais indicam meta de aumento da presença digital e reforço do posicionamento do banco como ambiente mais ágil e digital. | Ecossistema próprio | Diretriz institucional | Médio, mostra intenção estratégica, mas com menos evidência pública de entrega | Médio-alto, por necessidade de governança e execução | **Média** |
+| Banpará | Conectividade / segurança | Banpará manteve em licitação pública a contratação de links dedicados de 1 Gbps com balanceamento e solução Anti-DDoS, reforçando prioridade explícita em conectividade e proteção perimetral. | Operadoras e fornecedores de rede | Licitação de infraestrutura crítica | Médio-alto, sinaliza dor real de disponibilidade, tráfego e resiliência | Alto, por criticidade operacional, continuidade e proteção contra ataques | **Alta** |
 | Sicoob | IA generativa / core bancário | Sicoob lançou Sisbr IA, chat conversacional integrado ao core bancário, e Pesquisa Inteligente de Normativos para mais de 62 mil colaboradores. | Modelos Llama, DeepSeek, Phi, Mistral | Plataforma interna / transformação digital | Altíssimo, produtividade, governança e IA operacional em escala | Alto, por segurança, dados internos e governança de modelos | **Muito alta** |
 
 ## Camada TCU e controle
@@ -104,14 +104,14 @@ Tese:
 - pagamentos offline, agência-barco, ATMs compactos, canais leves, presença em municípios de baixa cobertura e jornadas figitais.
 
 ## Lacunas e ressalvas desta versão
-- **Banpará** apareceu mais forte em **compras e contratos de TI** do que em notícias de inovação propriamente ditas.
+- **Banpará** segue aparecendo mais forte em **compras, contratos e editais de TI** do que em anúncios públicos de inovação de negócio, mas o sinal de conectividade crítica com Anti-DDoS ganhou materialidade nesta rodada.
 - **BRB** mostra bons sinais estratégicos, mas ainda com menos material técnico público do que BB, CAIXA, BNB e Sicoob.
 - **H3C** segue sem prova pública forte no recorte atual.
 - Para alguns bancos estaduais, o **ângulo TCU** tende a ser mais fraco ou menos direto do que para bancos federais.
 
 ## Fontes principais
 - BB + conectividade: https://dplnews.com/claro-implanta-nova-rede-de-conectividade-nas-agencias-do-banco-do-brasil/
-- BB + IA agêntica: https://itforum.com.br/noticias/banco-do-brasil-visa-1-transacao-agente-de-ia/
+- BB + IA agêntica: https://www.visa.com.br/sobre-a-visa/noticias-visa/nova-sala-de-imprensa/bb-visa-primeira-transacao-agentica-brasil.html
 - CAIXA + pagamentos offline: https://caixanoticias.caixa.gov.br/Paginas/Not%C3%ADcias/2024/06-JUNHO/No-ultimo-dia-de-Febraban-Tech-2024-CAIXA-apresenta-solucao-inovadora-para-pagamentos-offline.aspx
 - CAIXA + chamada IA jurídica: https://caixanoticias.caixa.gov.br/Paginas/Not%C3%ADcias/2026/01-JANEIRO/CAIXA-lanca-chamada-de-startups-para-contratar-solucao-em-IA-aplicada-ao-suporte-juridico.aspx
 - BRB + Tecban: https://www.tecban.com.br/noticia/em-parceria-com-a-tecban-brb-leva-inclusao-financeira-e-acesso-bancario-a
@@ -125,4 +125,5 @@ Tese:
 - BASA + LGPD/TCU: https://sites.tcu.gov.br/recursos/auditoria-sobre-lgpd/relatorios/bancos/BANCO%20DA%20AMAZ%C3%94NIA.pdf
 - Banpará + pregão Microsoft: https://www.banpara.b.br/pregao-eletronico/pregao-eletronico-001-2024/
 - Banpará + contrato Microsoft: https://www.banpara.b.br/contratos-e-notas-de-empenho/
+- Banpará + conectividade / Anti-DDoS: https://www.banpara.b.br/PortalImagens/lm3jvmgo/esclarecimento-ii-pe-031-2024-links-de-internet.pdf?mode=pad&rnd=133845230077400000
 - Sicoob + IA generativa: https://www.sicoob.com.br/web/sicoob/noticias/-/asset_publisher/xAioIawpOI5S/content/id/275173922
