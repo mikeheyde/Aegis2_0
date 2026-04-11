@@ -87,6 +87,7 @@ a:hover { text-decoration: underline; }
   justify-content: space-between;
   gap: 12px;
 }
+.bank-list li.muted-zero { opacity: 0.72; }
 .bank-link, .table-bank, .vendor-link {
   background: transparent;
   color: var(--text);
@@ -159,6 +160,20 @@ th {
 }
 tr:hover td { background: rgba(103, 232, 249, 0.03); }
 tr.hidden-row { display: none; }
+.date-cell {
+  display: grid;
+  gap: 4px;
+  min-width: 112px;
+}
+.date-main {
+  font-weight: 700;
+  color: var(--text);
+}
+.date-sub {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
 .source-link {
   display: inline-flex;
   flex-direction: column;

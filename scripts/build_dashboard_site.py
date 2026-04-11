@@ -5,7 +5,7 @@ import json
 import re
 import unicodedata
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -53,34 +53,125 @@ for item in WATCHLIST:
     patterns = [re.compile(rf'(?<![a-z0-9]){re.escape(alias)}(?![a-z0-9])') for alias in normalized_aliases]
     VENDOR_MATCHERS.append({'label': item['label'], 'patterns': patterns})
 
+DEFAULT_WINDOW_DAYS = 30
+MAX_HISTORY_DAYS = 365
+WINDOW_OPTIONS = [
+    ('30', 'Últimos 30 dias'),
+    ('90', 'Últimos 90 dias'),
+    ('180', 'Últimos 180 dias'),
+    ('365', 'Todos (1 ano)'),
+]
+PRIORITY_ORDER = {
+    'Muito alta': 0,
+    'Alta': 1,
+    'Média': 2,
+    'Media': 2,
+    'Baixa': 3,
+}
 
-csv_candidates = sorted(REPORTS_DIR.glob(REPORT_PATTERN))
-if not csv_candidates:
+
+def priority_rank(value: str) -> int:
+    return PRIORITY_ORDER.get((value or '').strip(), 9)
+
+
+def unique_preserve(values):
+    seen = set()
+    ordered = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        ordered.append(value)
+    return ordered
+
+
+def parse_report_date(path: Path):
+    match = DATE_RE.search(path.name)
+    if not match:
+        return None
+    return datetime.strptime(match.group(1), '%Y-%m-%d').date()
+
+
+def within_window(row, days: int, anchor_date) -> bool:
+    first_seen = datetime.strptime(row['__first_seen'], '%Y-%m-%d').date()
+    delta = (anchor_date - first_seen).days
+    return 0 <= delta < days
+
+
+dated_csv_candidates = []
+for candidate in sorted(REPORTS_DIR.glob(REPORT_PATTERN)):
+    parsed_date = parse_report_date(candidate)
+    if parsed_date is not None:
+        dated_csv_candidates.append((parsed_date, candidate))
+
+if not dated_csv_candidates:
     raise SystemExit('Nenhum CSV de dashboard encontrado em reports/.')
 
-latest_csv = csv_candidates[-1]
-match = DATE_RE.search(latest_csv.name)
-report_date = match.group(1) if match else latest_csv.stem.rsplit('-', 1)[-1]
+dated_csv_candidates.sort(key=lambda item: item[0])
+latest_report_date_obj, latest_csv = dated_csv_candidates[-1]
+report_date = latest_report_date_obj.isoformat()
 latest_md = REPORTS_DIR / f'dashboard-bancos-publicos-e-cooperativos-{report_date}.md'
 if not latest_md.exists():
     raise SystemExit(f'Markdown correspondente não encontrado: {latest_md.name}')
 
+history_start_date_obj = latest_report_date_obj - timedelta(days=MAX_HISTORY_DAYS - 1)
+history_csv_candidates = [
+    (report_dt, path)
+    for report_dt, path in dated_csv_candidates
+    if report_dt >= history_start_date_obj
+]
+history_loaded_since = history_csv_candidates[0][0].isoformat()
+
 build_timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
 
-rows = []
-with latest_csv.open(newline='', encoding='utf-8') as f:
-    reader = csv.DictReader(f)
-    for row in reader:
-        companies = [part.strip() for part in row['Empresas_citadas'].split(';') if part.strip()]
-        normalized_text = normalize_text(' '.join(str(value) for value in row.values()))
-        matched_vendors = [
-            matcher['label']
-            for matcher in VENDOR_MATCHERS
-            if any(pattern.search(normalized_text) for pattern in matcher['patterns'])
-        ]
-        row['__companies'] = companies
-        row['__vendors'] = matched_vendors
-        rows.append(row)
+row_map = {}
+for report_dt, report_csv in history_csv_candidates:
+    report_date_str = report_dt.isoformat()
+    with report_csv.open(newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            cleaned_row = {key: (value or '').strip() for key, value in row.items()}
+            companies = [part.strip() for part in cleaned_row['Empresas_citadas'].split(';') if part.strip()]
+            normalized_text = normalize_text(' '.join(str(value) for value in cleaned_row.values()))
+            matched_vendors = [
+                matcher['label']
+                for matcher in VENDOR_MATCHERS
+                if any(pattern.search(normalized_text) for pattern in matcher['patterns'])
+            ]
+            row_key = (
+                cleaned_row.get('Banco', ''),
+                cleaned_row.get('Tema', ''),
+                cleaned_row.get('Fonte', ''),
+                cleaned_row.get('Fato_relevante', ''),
+            )
+            existing = row_map.get(row_key)
+            if existing is None:
+                cleaned_row['__companies'] = companies
+                cleaned_row['__vendors'] = matched_vendors
+                cleaned_row['__first_seen'] = report_date_str
+                cleaned_row['__last_seen'] = report_date_str
+                cleaned_row['__seen_count'] = 1
+                row_map[row_key] = cleaned_row
+                continue
+
+            existing.update(cleaned_row)
+            existing['__companies'] = unique_preserve(existing['__companies'] + companies)
+            existing['__vendors'] = unique_preserve(existing['__vendors'] + matched_vendors)
+            existing['__first_seen'] = min(existing['__first_seen'], report_date_str)
+            existing['__last_seen'] = max(existing['__last_seen'], report_date_str)
+            existing['__seen_count'] += 1
+
+rows = sorted(
+    row_map.values(),
+    key=lambda row: (
+        -datetime.strptime(row['__first_seen'], '%Y-%m-%d').date().toordinal(),
+        priority_rank(row['Prioridade']),
+        row['Banco'],
+        row['Tema'],
+    ),
+)
+
+default_rows = [row for row in rows if within_window(row, DEFAULT_WINDOW_DAYS, latest_report_date_obj)]
 
 priority_counts = Counter(row['Prioridade'] for row in rows)
 banks = sorted({row['Banco'] for row in rows})
@@ -89,12 +180,21 @@ watchlist_counts = Counter(vendor for row in rows for vendor in row['__vendors']
 company_counts = Counter(company for row in rows for company in row['__companies'])
 detected_watchlist = [vendor for vendor in WATCHLIST if watchlist_counts[vendor['label']] > 0]
 
+default_priority_counts = Counter(row['Prioridade'] for row in default_rows)
+default_bank_counts = Counter(row['Banco'] for row in default_rows)
+default_watchlist_counts = Counter(vendor for row in default_rows for vendor in row['__vendors'])
+
+window_counts = {
+    days: sum(1 for row in rows if within_window(row, int(days), latest_report_date_obj))
+    for days, _ in WINDOW_OPTIONS
+}
+
 cards = [
-    ('Bancos monitorados', str(len(banks))),
-    ('Matérias catalogadas', str(len(rows))),
-    ('Vendors com sinal', str(sum(1 for vendor in WATCHLIST if watchlist_counts[vendor['label']] > 0))),
-    ('Prioridade muito alta', str(priority_counts['Muito alta'])),
-    ('Prioridade alta', str(priority_counts['Alta'])),
+    ('Bancos monitorados', str(len({row['Banco'] for row in default_rows}))),
+    ('Matérias catalogadas', str(len(default_rows))),
+    ('Vendors com sinal', str(sum(1 for vendor in WATCHLIST if default_watchlist_counts[vendor['label']] > 0))),
+    ('Prioridade muito alta', str(default_priority_counts['Muito alta'])),
+    ('Prioridade alta', str(default_priority_counts['Alta'])),
 ]
 
 
@@ -131,33 +231,47 @@ def compact_url(url: str) -> str:
 
 
 bank_filter_buttons = [
-    '<button class="filter-chip active" type="button" data-filter-kind="bank" data-filter-value="__all__">Todos</button>'
+    f'<button class="filter-chip active" type="button" data-filter-kind="bank" data-filter-value="__all__">Todos <span data-count-kind="bank" data-count-value="__all__">{len(default_rows)}</span></button>'
 ]
 for bank in banks:
+    count = default_bank_counts[bank]
+    extra_class = ' muted-zero' if count == 0 else ''
     bank_filter_buttons.append(
-        f'<button class="filter-chip" type="button" data-filter-kind="bank" data-filter-value="{html.escape(bank)}">{html.escape(bank)} <span>{bank_counts[bank]}</span></button>'
+        f'<button class="filter-chip{extra_class}" type="button" data-filter-kind="bank" data-filter-value="{html.escape(bank)}">{html.escape(bank)} <span data-count-kind="bank" data-count-value="{html.escape(bank)}">{count}</span></button>'
     )
 
 vendor_filter_buttons = [
-    '<button class="filter-chip active" type="button" data-filter-kind="vendor" data-filter-value="__all__">Todos</button>'
+    f'<button class="filter-chip active" type="button" data-filter-kind="vendor" data-filter-value="__all__">Todos <span data-count-kind="vendor" data-count-value="__all__">{len(default_rows)}</span></button>'
 ]
 for item in WATCHLIST:
     label = item['label']
-    extra_class = ' muted-zero' if watchlist_counts[label] == 0 else ''
+    count = default_watchlist_counts[label]
+    extra_class = ' muted-zero' if count == 0 else ''
     vendor_filter_buttons.append(
-        f'<button class="filter-chip{extra_class}" type="button" data-filter-kind="vendor" data-filter-value="{html.escape(label)}">{html.escape(label)} <span>{watchlist_counts[label]}</span></button>'
+        f'<button class="filter-chip{extra_class}" type="button" data-filter-kind="vendor" data-filter-value="{html.escape(label)}">{html.escape(label)} <span data-count-kind="vendor" data-count-value="{html.escape(label)}">{count}</span></button>'
     )
 
-bank_list = ''.join(
-    f'<li><button type="button" class="bank-link" data-filter-kind="bank" data-filter-value="{html.escape(bank)}">{html.escape(bank)}</button><span class="bank-count">{bank_counts[bank]}</span></li>'
-    for bank in banks
-)
+window_filter_buttons = []
+for days, label in WINDOW_OPTIONS:
+    active_class = ' active' if int(days) == DEFAULT_WINDOW_DAYS else ''
+    window_filter_buttons.append(
+        f'<button class="filter-chip{active_class}" type="button" data-filter-kind="window" data-filter-value="{days}">{html.escape(label)} <span data-count-kind="window" data-count-value="{days}">{window_counts[days]}</span></button>'
+    )
+
+bank_list_items = []
+for bank in banks:
+    li_class = " class='muted-zero'" if default_bank_counts[bank] == 0 else ''
+    bank_list_items.append(
+        f'<li{li_class}><button type="button" class="bank-link" data-filter-kind="bank" data-filter-value="{html.escape(bank)}">{html.escape(bank)}</button><span class="bank-count" data-count-kind="bank" data-count-value="{html.escape(bank)}">{default_bank_counts[bank]}</span></li>'
+    )
+bank_list = ''.join(bank_list_items)
 
 vendor_watchlist_items = []
 for item in WATCHLIST:
     label = item['label']
+    li_class = " class='muted-zero'" if default_watchlist_counts[label] == 0 else ''
     vendor_watchlist_items.append(
-        f'<li><button type="button" class="vendor-link" data-filter-kind="vendor" data-filter-value="{html.escape(label)}">{html.escape(label)}</button><span class="bank-count">{watchlist_counts[label]}</span></li>'
+        f'<li{li_class}><button type="button" class="vendor-link" data-filter-kind="vendor" data-filter-value="{html.escape(label)}">{html.escape(label)}</button><span class="bank-count" data-count-kind="vendor" data-count-value="{html.escape(label)}">{default_watchlist_counts[label]}</span></li>'
     )
 vendor_watchlist_list = ''.join(vendor_watchlist_items)
 
@@ -184,19 +298,33 @@ for row in rows:
     source = row['Fonte']
     row_vendors = row['__vendors']
     row_vendors_attr = html.escape('|'.join(row_vendors))
+    first_seen = row['__first_seen']
+    last_seen = row['__last_seen']
+    seen_count = row['__seen_count']
+    date_cell = [f'<div class="date-main">{html.escape(first_seen)}</div>']
+    if seen_count > 1:
+        date_cell.append(f'<div class="date-sub">vista {seen_count}x até {html.escape(last_seen)}</div>')
+    else:
+        date_cell.append('<div class="date-sub">captura inicial</div>')
+    default_hidden_class = '' if within_window(row, DEFAULT_WINDOW_DAYS, latest_report_date_obj) else 'class="hidden-row" '
     vendor_cell = ''.join(
         f'<button type="button" class="vendor-pill" data-filter-kind="vendor" data-filter-value="{html.escape(vendor)}">{html.escape(vendor)}</button>'
         for vendor in row_vendors
     ) or '<span class="small">Sem vendor da watchlist nesta matéria</span>'
     rows_html.append(
         '<tr '
+        f'{default_hidden_class}'
         f'data-bank="{html.escape(bank)}" '
         f'data-priority="{html.escape(priority)}" '
-        f'data-vendors="{row_vendors_attr}">'
+        f'data-vendors="{row_vendors_attr}" '
+        f'data-first-seen="{html.escape(first_seen)}" '
+        f'data-last-seen="{html.escape(last_seen)}" '
+        f'data-seen-count="{seen_count}">'
+        f'<td><div class="date-cell">{"".join(date_cell)}</div></td>'
         f'<td><button type="button" class="table-bank" data-filter-kind="bank" data-filter-value="{html.escape(bank)}">{html.escape(bank)}</button></td>'
         f'<td>{html.escape(row["Tema"]).replace("_", " ")}</td>'
         f'<td>{html.escape(row["Fato_relevante"])}</td>'
-        f'<td>{html.escape(row["Empresas_citadas"]).replace(";", ", ")}</td>'
+        f'<td>{html.escape(", ".join(row["__companies"]))}</td>'
         f'<td><div class="vendor-cell">{vendor_cell}</div></td>'
         f'<td>{html.escape(row["Tipo_de_vinculo"]).replace("_", " ")}</td>'
         f'<td>{html.escape(row["Impacto_estrategico"])}</td>'
@@ -213,6 +341,8 @@ card_html = ''.join(
     f'<div class="card" data-card="{html.escape(label)}"><div class="card-label">{html.escape(label)}</div><div class="card-value">{html.escape(value)}</div></div>'
     for label, value in cards
 )
+
+aggregate_csv_name = 'dashboard-bancos-publicos-acumulado-365d.csv'
 
 style_css = '''
 :root {
@@ -304,6 +434,7 @@ a:hover { text-decoration: underline; }
   justify-content: space-between;
   gap: 12px;
 }
+.bank-list li.muted-zero { opacity: 0.72; }
 .bank-link, .table-bank, .vendor-link {
   background: transparent;
   color: var(--text);
@@ -376,6 +507,20 @@ th {
 }
 tr:hover td { background: rgba(103, 232, 249, 0.03); }
 tr.hidden-row { display: none; }
+.date-cell {
+  display: grid;
+  gap: 4px;
+  min-width: 112px;
+}
+.date-main {
+  font-weight: 700;
+  color: var(--text);
+}
+.date-sub {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
 .source-link {
   display: inline-flex;
   flex-direction: column;
@@ -441,9 +586,11 @@ tr.hidden-row { display: none; }
 app_js = '''
 const rows = Array.from(document.querySelectorAll('tbody tr'));
 const filterButtons = Array.from(document.querySelectorAll('[data-filter-kind]'));
+const countBadges = Array.from(document.querySelectorAll('[data-count-kind]'));
 const resultsCount = document.querySelector('[data-results-count]');
 const activeBankLabel = document.querySelector('[data-active-bank-label]');
 const activeVendorLabel = document.querySelector('[data-active-vendor-label]');
+const activeWindowLabel = document.querySelector('[data-active-window-label]');
 const emptyState = document.querySelector('[data-empty-state]');
 const clearButtons = Array.from(document.querySelectorAll('[data-clear-filter]'));
 const cards = {
@@ -453,16 +600,35 @@ const cards = {
   veryHigh: document.querySelector('[data-card="Prioridade muito alta"] .card-value'),
   high: document.querySelector('[data-card="Prioridade alta"] .card-value'),
 };
+const DEFAULT_WINDOW = '30';
+const WINDOW_LABELS = {
+  '30': 'Últimos 30 dias',
+  '90': 'Últimos 90 dias',
+  '180': 'Últimos 180 dias',
+  '365': 'Todos (1 ano)',
+};
+const referenceDate = parseIsoDate(document.documentElement.dataset.latestReportDate);
+
+function parseIsoDate(value) {
+  if (!value) return null;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function normalizeWindow(value) {
+  return WINDOW_LABELS[value] ? value : DEFAULT_WINDOW;
+}
 
 function getCurrentFilters() {
   const params = new URLSearchParams(window.location.search);
   return {
     bank: params.get('bank') || '__all__',
     vendor: params.get('vendor') || '__all__',
+    window: normalizeWindow(params.get('window') || DEFAULT_WINDOW),
   };
 }
 
-function setCurrentFilters(bank, vendor) {
+function setCurrentFilters(bank, vendor, windowValue) {
   const params = new URLSearchParams(window.location.search);
   if (!bank || bank === '__all__') {
     params.delete('bank');
@@ -474,6 +640,11 @@ function setCurrentFilters(bank, vendor) {
   } else {
     params.set('vendor', vendor);
   }
+  if (!windowValue || normalizeWindow(windowValue) === DEFAULT_WINDOW) {
+    params.delete('window');
+  } else {
+    params.set('window', normalizeWindow(windowValue));
+  }
   const query = params.toString();
   const nextUrl = `${window.location.pathname}${query ? `?${query}` : ''}`;
   window.history.replaceState({}, '', nextUrl);
@@ -483,25 +654,84 @@ function splitVendors(row) {
   return (row.dataset.vendors || '').split('|').filter(Boolean);
 }
 
-function applyFilters(bank, vendor) {
+function matchesWindow(row, windowValue) {
+  if (!referenceDate) return true;
+  const rowDate = parseIsoDate(row.dataset.firstSeen);
+  if (!rowDate) return true;
+  const days = Number(normalizeWindow(windowValue));
+  if (!Number.isFinite(days)) return true;
+  const delta = Math.floor((referenceDate.getTime() - rowDate.getTime()) / 86400000);
+  return delta >= 0 && delta < days;
+}
+
+function rowMatches(row, filters) {
+  const targetBank = filters.bank || '__all__';
+  const targetVendor = filters.vendor || '__all__';
+  const rowVendors = splitVendors(row);
+  const matchesBank = targetBank === '__all__' || row.dataset.bank === targetBank;
+  const matchesVendor = targetVendor === '__all__' || rowVendors.includes(targetVendor);
+  return matchesBank && matchesVendor && matchesWindow(row, filters.window);
+}
+
+function setButtonStates(current) {
+  filterButtons.forEach((button) => {
+    const kind = button.dataset.filterKind;
+    const value = button.dataset.filterValue;
+    const isActive = (kind === 'bank' && value === current.bank)
+      || (kind === 'vendor' && value === current.vendor)
+      || (kind === 'window' && value === current.window);
+    button.classList.toggle('active', isActive);
+  });
+}
+
+function countRowsFor(kind, value, current) {
+  const filters = {
+    bank: kind === 'bank' ? value : current.bank,
+    vendor: kind === 'vendor' ? value : current.vendor,
+    window: kind === 'window' ? value : current.window,
+  };
+  return rows.filter((row) => rowMatches(row, filters)).length;
+}
+
+function updateBadges(current) {
+  countBadges.forEach((badge) => {
+    const kind = badge.dataset.countKind;
+    const value = badge.dataset.countValue || '__all__';
+    const count = countRowsFor(kind, value, current);
+    badge.textContent = String(count);
+
+    if (kind === 'window' || value === '__all__') return;
+    const filterChip = badge.closest('.filter-chip');
+    if (filterChip) filterChip.classList.toggle('muted-zero', count === 0);
+    const listRow = badge.closest('li');
+    if (listRow) listRow.classList.toggle('muted-zero', count === 0);
+  });
+}
+
+function applyFilters(bank, vendor, windowValue) {
   const targetBank = bank || '__all__';
   const targetVendor = vendor || '__all__';
+  const targetWindow = normalizeWindow(windowValue || DEFAULT_WINDOW);
   const visibleRows = [];
 
   rows.forEach((row) => {
-    const matchesBank = targetBank === '__all__' || row.dataset.bank === targetBank;
-    const rowVendors = splitVendors(row);
-    const matchesVendor = targetVendor === '__all__' || rowVendors.includes(targetVendor);
-    const matches = matchesBank && matchesVendor;
+    const matches = rowMatches(row, {
+      bank: targetBank,
+      vendor: targetVendor,
+      window: targetWindow,
+    });
     row.classList.toggle('hidden-row', !matches);
     if (matches) visibleRows.push(row);
   });
 
-  filterButtons.forEach((button) => {
-    const isActive = (button.dataset.filterKind === 'bank' && button.dataset.filterValue === targetBank)
-      || (button.dataset.filterKind === 'vendor' && button.dataset.filterValue === targetVendor);
-    button.classList.toggle('active', isActive);
-  });
+  const current = {
+    bank: targetBank,
+    vendor: targetVendor,
+    window: targetWindow,
+  };
+
+  setButtonStates(current);
+  updateBadges(current);
 
   const visibleBanks = new Set(visibleRows.map((row) => row.dataset.bank));
   const visibleVendors = new Set(visibleRows.flatMap((row) => splitVendors(row)));
@@ -511,36 +741,39 @@ function applyFilters(bank, vendor) {
   resultsCount.textContent = `${visibleRows.length} matéria(s) visível(is)`;
   activeBankLabel.textContent = targetBank === '__all__' ? 'Todos os bancos' : targetBank;
   activeVendorLabel.textContent = targetVendor === '__all__' ? 'Todos os vendors' : targetVendor;
+  activeWindowLabel.textContent = WINDOW_LABELS[targetWindow] || WINDOW_LABELS[DEFAULT_WINDOW];
   cards.banks.textContent = String(visibleBanks.size || 0);
   cards.rows.textContent = String(visibleRows.length);
   cards.vendors.textContent = String(visibleVendors.size || 0);
   cards.veryHigh.textContent = String(visibleVeryHigh);
   cards.high.textContent = String(visibleHigh);
   emptyState.classList.toggle('visible', visibleRows.length === 0);
-  setCurrentFilters(targetBank, targetVendor);
+  setCurrentFilters(targetBank, targetVendor, targetWindow);
 }
 
 filterButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const current = getCurrentFilters();
     if (button.dataset.filterKind === 'bank') {
-      applyFilters(button.dataset.filterValue, current.vendor);
+      applyFilters(button.dataset.filterValue, current.vendor, current.window);
+    } else if (button.dataset.filterKind === 'vendor') {
+      applyFilters(current.bank, button.dataset.filterValue, current.window);
     } else {
-      applyFilters(current.bank, button.dataset.filterValue);
+      applyFilters(current.bank, current.vendor, button.dataset.filterValue);
     }
   });
 });
 
 clearButtons.forEach((button) => {
-  button.addEventListener('click', () => applyFilters('__all__', '__all__'));
+  button.addEventListener('click', () => applyFilters('__all__', '__all__', DEFAULT_WINDOW));
 });
 
 const initial = getCurrentFilters();
-applyFilters(initial.bank, initial.vendor);
+applyFilters(initial.bank, initial.vendor, initial.window);
 '''
 
 html_doc = f'''<!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-latest-report-date="{html.escape(report_date)}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -553,11 +786,12 @@ html_doc = f'''<!doctype html>
 <body>
   <div class="wrap">
     <section class="hero">
-      <div class="meta">Atualizado em {html.escape(build_timestamp)} · base publicada em {html.escape(report_date)} · atualização diária programada</div>
+      <div class="meta">Atualizado em {html.escape(build_timestamp)} · histórico carregado de {html.escape(history_loaded_since)} até {html.escape(report_date)} (máx. 1 ano) · atualização diária programada</div>
       <h1>Radar estratégico, bancos públicos, regionais e cooperativismo financeiro</h1>
       <div class="subtitle">Painel executivo com foco em tecnologia, IA, conectividade, transformação digital, canais, pagamentos, privacidade, governança, compras de TI e vendors críticos para bancos públicos, regionais e cooperativas financeiras.</div>
       <div class="downloads">
-        <a class="btn" href="dashboard-bancos-publicos-latest.csv" download>Baixar CSV mais recente</a>
+        <a class="btn" href="{aggregate_csv_name}" download>Baixar CSV acumulado (1 ano)</a>
+        <a class="btn" href="dashboard-bancos-publicos-latest.csv" download>Baixar CSV da rodada mais recente</a>
         <a class="btn" href="dashboard-bancos-publicos-latest.md" download>Baixar Markdown mais recente</a>
       </div>
     </section>
@@ -567,6 +801,8 @@ html_doc = f'''<!doctype html>
     <section class="layout">
       <aside class="panel">
         <h2>Filtros e leitura rápida</h2>
+        <h3>Filtrar por janela</h3>
+        <div class="filters">{''.join(window_filter_buttons)}</div>
         <h3>Filtrar por banco</h3>
         <div class="filters">{''.join(bank_filter_buttons)}</div>
         <h3>Filtrar por vendor</h3>
@@ -595,15 +831,17 @@ html_doc = f'''<!doctype html>
           <div class="active-filter">
             <div class="active-pill">Banco: <strong data-active-bank-label>Todos os bancos</strong></div>
             <div class="active-pill">Vendor: <strong data-active-vendor-label>Todos os vendors</strong></div>
-            <div class="small" data-results-count>{len(rows)} matéria(s) visível(is)</div>
+            <div class="active-pill">Janela: <strong data-active-window-label>Últimos 30 dias</strong></div>
+            <div class="small" data-results-count>{len(default_rows)} matéria(s) visível(is)</div>
           </div>
           <button type="button" class="clear-btn" data-clear-filter>Limpar filtros</button>
         </div>
-        <div class="small">Clique no banco para isolar a instituição, clique no vendor para cruzar fabricante e use a fonte para abrir a publicação original.</div>
+        <div class="small">A janela de tempo considera a primeira captura do sinal no radar. Clique no banco para isolar a instituição, clique no vendor para cruzar fabricante e use a fonte para abrir a publicação original.</div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
+                <th>Data</th>
                 <th>Banco</th>
                 <th>Tema</th>
                 <th>Fato relevante</th>
@@ -621,7 +859,7 @@ html_doc = f'''<!doctype html>
             </tbody>
           </table>
         </div>
-        <div class="empty-state" data-empty-state>Nenhuma matéria encontrada para esse recorte. Limpe os filtros para voltar ao panorama completo.</div>
+        <div class="empty-state{' visible' if not default_rows else ''}" data-empty-state>Nenhuma matéria encontrada para esse recorte. Limpe os filtros para voltar ao panorama completo.</div>
       </main>
     </section>
   </div>
@@ -651,6 +889,42 @@ htaccess_content = '''<IfModule mod_headers.c>
 </IfModule>
 '''
 
+aggregate_csv_path = OUT_DIR / aggregate_csv_name
+with aggregate_csv_path.open('w', newline='', encoding='utf-8') as f:
+    fieldnames = [
+        'Data_primeira_captura',
+        'Data_ultima_captura',
+        'Capturas_no_periodo',
+        'Banco',
+        'Tema',
+        'Fato_relevante',
+        'Empresas_citadas',
+        'Vendors_radar',
+        'Tipo_de_vinculo',
+        'Impacto_estrategico',
+        'Risco_regulatorio_controle',
+        'Prioridade',
+        'Fonte',
+    ]
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({
+            'Data_primeira_captura': row['__first_seen'],
+            'Data_ultima_captura': row['__last_seen'],
+            'Capturas_no_periodo': row['__seen_count'],
+            'Banco': row['Banco'],
+            'Tema': row['Tema'],
+            'Fato_relevante': row['Fato_relevante'],
+            'Empresas_citadas': '; '.join(row['__companies']),
+            'Vendors_radar': '; '.join(row['__vendors']),
+            'Tipo_de_vinculo': row['Tipo_de_vinculo'],
+            'Impacto_estrategico': row['Impacto_estrategico'],
+            'Risco_regulatorio_controle': row['Risco_regulatorio_controle'],
+            'Prioridade': row['Prioridade'],
+            'Fonte': row['Fonte'],
+        })
+
 (OUT_DIR / 'index.html').write_text(html_doc, encoding='utf-8')
 (OUT_DIR / 'style.css').write_text(style_css.strip() + '\n', encoding='utf-8')
 (OUT_DIR / 'app.js').write_text(app_js.strip() + '\n', encoding='utf-8')
@@ -667,6 +941,8 @@ print(json.dumps({
     'banks': len(banks),
     'vendors_with_signal': sum(1 for vendor in WATCHLIST if watchlist_counts[vendor['label']] > 0),
     'report_date': report_date,
+    'history_loaded_since': history_loaded_since,
+    'history_reports': len(history_csv_candidates),
     'build_timestamp': build_timestamp,
     'files': [
         'index.html',
@@ -674,6 +950,7 @@ print(json.dumps({
         'app.js',
         '_headers',
         '.htaccess',
+        aggregate_csv_name,
         latest_csv.name,
         latest_md.name,
         'dashboard-bancos-publicos-latest.csv',
