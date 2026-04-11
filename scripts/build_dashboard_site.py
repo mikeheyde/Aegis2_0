@@ -303,9 +303,9 @@ for row in rows:
     seen_count = row['__seen_count']
     date_cell = [f'<div class="date-main">{html.escape(first_seen)}</div>']
     if seen_count > 1:
-        date_cell.append(f'<div class="date-sub">vista {seen_count}x até {html.escape(last_seen)}</div>')
+        date_cell.append(f'<div class="date-sub">entrou no dashboard e reapareceu {seen_count}x até {html.escape(last_seen)}</div>')
     else:
-        date_cell.append('<div class="date-sub">captura inicial</div>')
+        date_cell.append('<div class="date-sub">data de entrada no dashboard</div>')
     default_hidden_class = '' if within_window(row, DEFAULT_WINDOW_DAYS, latest_report_date_obj) else 'class="hidden-row" '
     vendor_cell = ''.join(
         f'<button type="button" class="vendor-pill" data-filter-kind="vendor" data-filter-value="{html.escape(vendor)}">{html.escape(vendor)}</button>'
@@ -786,7 +786,7 @@ html_doc = f'''<!doctype html>
 <body>
   <div class="wrap">
     <section class="hero">
-      <div class="meta">Atualizado em {html.escape(build_timestamp)} · histórico carregado de {html.escape(history_loaded_since)} até {html.escape(report_date)} (máx. 1 ano) · atualização diária programada</div>
+      <div class="meta">Atualizado em {html.escape(build_timestamp)} · histórico de entradas no dashboard carregado de {html.escape(history_loaded_since)} até {html.escape(report_date)} (máx. 1 ano) · atualização diária programada</div>
       <h1>Radar estratégico, bancos públicos, regionais e cooperativismo financeiro</h1>
       <div class="subtitle">Painel executivo com foco em tecnologia, IA, conectividade, transformação digital, canais, pagamentos, privacidade, governança, compras de TI e vendors críticos para bancos públicos, regionais e cooperativas financeiras.</div>
       <div class="downloads">
@@ -836,12 +836,12 @@ html_doc = f'''<!doctype html>
           </div>
           <button type="button" class="clear-btn" data-clear-filter>Limpar filtros</button>
         </div>
-        <div class="small">A janela de tempo considera a primeira captura do sinal no radar. Clique no banco para isolar a instituição, clique no vendor para cruzar fabricante e use a fonte para abrir a publicação original.</div>
+        <div class="small">A janela de tempo considera a data em que a notícia entrou no dashboard, não a data original da matéria. Clique no banco para isolar a instituição, clique no vendor para cruzar fabricante e use a fonte para abrir a publicação original.</div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Data</th>
+                <th>Entrada no dashboard</th>
                 <th>Banco</th>
                 <th>Tema</th>
                 <th>Fato relevante</th>
@@ -892,9 +892,9 @@ htaccess_content = '''<IfModule mod_headers.c>
 aggregate_csv_path = OUT_DIR / aggregate_csv_name
 with aggregate_csv_path.open('w', newline='', encoding='utf-8') as f:
     fieldnames = [
-        'Data_primeira_captura',
-        'Data_ultima_captura',
-        'Capturas_no_periodo',
+        'Data_entrada_dashboard',
+        'Data_ultima_presenca_dashboard',
+        'Capturas_no_dashboard_no_periodo',
         'Banco',
         'Tema',
         'Fato_relevante',
@@ -910,9 +910,9 @@ with aggregate_csv_path.open('w', newline='', encoding='utf-8') as f:
     writer.writeheader()
     for row in rows:
         writer.writerow({
-            'Data_primeira_captura': row['__first_seen'],
-            'Data_ultima_captura': row['__last_seen'],
-            'Capturas_no_periodo': row['__seen_count'],
+            'Data_entrada_dashboard': row['__first_seen'],
+            'Data_ultima_presenca_dashboard': row['__last_seen'],
+            'Capturas_no_dashboard_no_periodo': row['__seen_count'],
             'Banco': row['Banco'],
             'Tema': row['Tema'],
             'Fato_relevante': row['Fato_relevante'],
