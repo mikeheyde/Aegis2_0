@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard, Bancos Públicos e Cooperativismo Financeiro</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121933;
+      --panel-2: #192347;
+      --text: #e8ecf8;
+      --muted: #9aa6c7;
+      --line: #2b3762;
+      --accent: #67e8f9;
+      --high: #f59e0b;
+      --vhigh: #ef4444;
+      --medium: #10b981;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: linear-gradient(180deg, #0b1020, #10172f 30%, #0b1020); color: var(--text); }
+    .wrap { max-width: 1400px; margin: 0 auto; padding: 32px 20px 56px; }
+    .hero { display: grid; gap: 12px; margin-bottom: 24px; }
+    h1 { margin: 0; font-size: 34px; line-height: 1.1; }
+    .subtitle { color: var(--muted); font-size: 16px; max-width: 980px; }
+    .meta { color: var(--muted); font-size: 13px; }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 24px 0; }
+    .card { background: rgba(18, 25, 51, 0.9); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.22); }
+    .card-label { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+    .card-value { font-size: 30px; font-weight: 700; }
+    .layout { display: grid; grid-template-columns: 320px 1fr; gap: 18px; align-items: start; }
+    .panel { background: rgba(18, 25, 51, 0.9); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.22); }
+    .panel h2 { margin: 0 0 14px; font-size: 18px; }
+    .panel h3 { margin: 18px 0 10px; font-size: 14px; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
+    ul { margin: 10px 0 0 18px; padding: 0; }
+    li { margin: 8px 0; color: #d6def5; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+    th { position: sticky; top: 0; background: #101937; z-index: 2; font-size: 12px; letter-spacing: .02em; color: #b9c5e4; text-transform: uppercase; }
+    tr:hover td { background: rgba(103, 232, 249, 0.03); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .chip { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .chip.very-high { background: rgba(239, 68, 68, 0.18); color: #fecaca; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .chip.high { background: rgba(245, 158, 11, 0.18); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.35); }
+    .chip.medium { background: rgba(16, 185, 129, 0.18); color: #bbf7d0; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .downloads { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 12px; }
+    .btn:hover { background: #20305f; text-decoration: none; }
+    .table-wrap { max-height: 72vh; overflow: auto; border: 1px solid var(--line); border-radius: 14px; }
+    .small { color: var(--muted); font-size: 12px; }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 28px; }
+      .wrap { padding: 20px 14px 36px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="meta">Publicado em 2026-04-11 · versão web do radar estratégico</div>
+      <h1>Dashboard, bancos públicos, regionais e cooperativismo financeiro</h1>
+      <div class="subtitle">Radar executivo com foco em tecnologia, IA, conectividade, transformação digital, canais, pagamentos, privacidade, governança e compras de TI em bancos públicos, regionais e no Sicoob.</div>
+      <div class="downloads">
+        <a class="btn" href="dashboard-bancos-publicos-e-cooperativos-2026-04-11.csv" download>Baixar CSV</a>
+        <a class="btn" href="dashboard-bancos-publicos-e-cooperativos-2026-04-11.md" download>Baixar Markdown</a>
+      </div>
+    </section>
+
+    <section class="grid"><div class="card"><div class="card-label">Bancos mapeados</div><div class="card-value">9</div></div><div class="card"><div class="card-label">Sinais catalogados</div><div class="card-value">17</div></div><div class="card"><div class="card-label">Prioridade muito alta</div><div class="card-value">7</div></div><div class="card"><div class="card-label">Prioridade alta</div><div class="card-value">9</div></div></section>
+
+    <section class="layout">
+      <aside class="panel">
+        <h2>Leitura rápida</h2>
+        <h3>Prioridade máxima</h3>
+        <ul>
+          <li>Banco do Brasil</li>
+          <li>CAIXA</li>
+          <li>BNB</li>
+          <li>Sicoob</li>
+        </ul>
+        <h3>Prioridade alta</h3>
+        <ul>
+          <li>Banestes</li>
+          <li>Banrisul</li>
+          <li>BASA</li>
+        </ul>
+        <h3>Prioridade seletiva</h3>
+        <ul>
+          <li>BRB</li>
+          <li>Banpará</li>
+        </ul>
+        <h3>Bancos no escopo</h3>
+        <ul><li>BASA</li><li>BNB</li><li>BRB</li><li>Banco do Brasil</li><li>Banestes</li><li>Banpará</li><li>Banrisul</li><li>CAIXA</li><li>Sicoob</li></ul>
+        <h3>Recorte por fornecedor</h3>
+        <ul>
+          <li><strong>Huawei:</strong> sinal direto e forte no Banco do Brasil.</li>
+          <li><strong>Cisco:</strong> sinal relevante no Banco da Amazônia, especialmente em conectividade e data center.</li>
+          <li><strong>H3C:</strong> sem evidência pública forte nesta rodada.</li>
+        </ul>
+        <div class="small">Observação: o radar privilegia sinais públicos verificáveis, não hipóteses comerciais sem fonte.</div>
+      </aside>
+
+      <main class="panel">
+        <h2>Base estruturada</h2>
+        <div class="small">Tabela com fatos relevantes, empresas citadas, impacto estratégico, risco regulatório/controle, prioridade e link de fonte.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Banco</th>
+                <th>Tema</th>
+                <th>Fato relevante</th>
+                <th>Empresas citadas</th>
+                <th>Tipo de vínculo</th>
+                <th>Impacto</th>
+                <th>Risco</th>
+                <th>Prioridade</th>
+                <th>Fonte</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Banco do Brasil</td><td>Conectividade SD-WAN</td><td>BB modernizou 93% das quase 5 mil agências com SD-WAN, dois links e dois roteadores por unidade, com economia mensal reportada de R$ 3,8 mi e meta de conclusão no 1T26.</td><td>Claro,  Huawei</td><td>Contratação moderna de rede</td><td>Altíssimo</td><td>Alto</td><td><span class="chip very-high">Muito alta</span></td><td><a href="https://dplnews.com/claro-implanta-nova-rede-de-conectividade-nas-agencias-do-banco-do-brasil/" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>Banco do Brasil</td><td>IA pagamentos</td><td>BB e Visa realizaram primeira transação financeira agêntica no Brasil, com autenticação, tokenização e monitoramento de risco via Visa Intelligent Commerce.</td><td>Visa</td><td>Piloto inovação transacional</td><td>Alto</td><td>Alto</td><td><span class="chip very-high">Muito alta</span></td><td><a href="https://itforum.com.br/noticias/banco-do-brasil-visa-1-transacao-agente-de-ia/" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>CAIXA</td><td>Pagamentos offline</td><td>CAIXA apresentou solução de pagamentos offline para benefícios em regiões remotas e informou testes com Agência-Barco.</td><td>Elo,  Microsoft</td><td>Parceria consórcio tecnológico</td><td>Altíssimo</td><td>Alto</td><td><span class="chip very-high">Muito alta</span></td><td><a href="https://caixanoticias.caixa.gov.br/Paginas/Not%C3%ADcias/2024/06-JUNHO/No-ultimo-dia-de-Febraban-Tech-2024-CAIXA-apresenta-solucao-inovadora-para-pagamentos-offline.aspx" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>CAIXA</td><td>IA jurídico</td><td>CAIXA abriu chamada de startups para solução de IA aplicada ao suporte jurídico, com CPSI e investimento de até R$ 1,6 mi.</td><td>Startups</td><td>Chamada pública contratação inovadora</td><td>Alto</td><td>Alto</td><td><span class="chip very-high">Muito alta</span></td><td><a href="https://caixanoticias.caixa.gov.br/Paginas/Not%C3%ADcias/2026/01-JANEIRO/CAIXA-lanca-chamada-de-startups-para-contratar-solucao-em-IA-aplicada-ao-suporte-juridico.aspx" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>BRB</td><td>Canais inclusão</td><td>BRB firmou parceria com a Tecban para instalar terminais compactos Banco24Horas em PB e TO, apoiando capilaridade após vencer folhas estaduais.</td><td>Tecban</td><td>Parceria operacional</td><td>Médio-alto</td><td>Médio</td><td><span class="chip high">Alta</span></td><td><a href="https://www.tecban.com.br/noticia/em-parceria-com-a-tecban-brb-leva-inclusao-financeira-e-acesso-bancario-a" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>BRB</td><td>IA personalização</td><td>BRB reporta IA no centro da estratégia, com uso em personalização, eficiência operacional, combate a crimes financeiros, SuperApp e assistente BáRBara.</td><td>Ecossistema_próprio</td><td>Estratégia transformação interna</td><td>Médio-alto</td><td>Alto</td><td><span class="chip high">Alta</span></td><td><a href="https://www.oitoquatronoticias.com.br/brb/brb-investe-em-ia-para-transformar-a-experiencia-bancaria-saiba-como/" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>BNB</td><td>Autoatendimento canais</td><td>BNB fechou acordo com a Tecban para instalar e gerir 100 caixas recicladores interoperáveis com tecnologia Banco24Horas em 11 estados.</td><td>Tecban,  Banco24Horas</td><td>Parceria modernização de canais</td><td>Alto</td><td>Médio-alto</td><td><span class="chip very-high">Muito alta</span></td><td><a href="https://www.tecban.com.br/noticia/tecban-e-banco-do-nordeste-firmam-parceria-para-modernizar-rede-de" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>BNB</td><td>Inovação Open Finance IA</td><td>BNB firmou parceria de 3 anos com o CESAR para mais de 25 projetos, focando Open Finance, fluxos de crédito, IA e design de soluções.</td><td>CESAR</td><td>Parceria de inovação</td><td>Altíssimo</td><td>Alto</td><td><span class="chip very-high">Muito alta</span></td><td><a href="https://www.cesar.org.br/w/cesar-anuncia-parceria-de-inovacao-com-o-banco-do-nordeste-bnb" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>BNB</td><td>Privacidade IA</td><td>BNB promoveu agenda institucional sobre IA, LGPD, sanções, terceiros e proteção de dados, via Semana da Privacidade.</td><td>Peck Advogados,  especialistas externos</td><td>Governança capacitação</td><td>Médio-alto</td><td>Alto</td><td><span class="chip high">Alta</span></td><td><a href="https://www.bnb.gov.br/imprensa/noticias/-/asset_publisher/QGdgGhxvRtMv/content/banco-do-nordeste-debate-uso-de-intelig%C3%AAncia-artificial-na-prote%C3%A7%C3%A3o-de-dados-de-clientes/44540" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>Banestes</td><td>IA generativa</td><td>Banestes lançou a Sab.IA, IA generativa própria para uso interno, em parceria com a startup capixaba Aumo e academia local.</td><td>Aumo,  Ufes,  Ifes</td><td>Parceria desenvolvimento de IA própria</td><td>Alto</td><td>Médio-alto</td><td><span class="chip high">Alta</span></td><td><a href="https://www.banestes.com.br/informes/2024/2024_04_23_01.html" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>Banrisul</td><td>DREX infraestrutura pública</td><td>Serpro e Banrisul assinaram acordo para desenvolver tecnologias conjuntas para o DREX e estudar casos de uso.</td><td>Serpro</td><td>Cooperação tecnológica</td><td>Alto</td><td>Alto</td><td><span class="chip high">Alta</span></td><td><a href="https://www.serpro.gov.br/menu/noticias/noticias-2024/serpro-banrisul-drex" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>Banrisul</td><td>IA responsável ecossistema</td><td>Parceria do Banrisul com o hub de IA do Tecnopuc foi renovada, com foco em startups, aceleração e avaliação de impacto algorítmico.</td><td>Tecnopuc,  Raies,  Fapergs</td><td>Ecossistema inovação</td><td>Médio-alto</td><td>Alto</td><td><span class="chip high">Alta</span></td><td><a href="https://coletiva.net/noticias/hub-de-inteligencia-artificial-do-tecnopuc-tem-parceria-renovada-com-banrisul/" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>BASA</td><td>Plataforma digital automação</td><td>Banco da Amazônia desenvolveu o BASA Digital com Red Hat OpenShift e Ansible, simplificando aprovação de crédito para produtores rurais em áreas remotas.</td><td>Red Hat</td><td>Modernização de plataforma</td><td>Alto</td><td>Médio-alto</td><td><span class="chip high">Alta</span></td><td><a href="https://www.redhat.com/pt-br/resources/banco-amazonia-openshift-snapshot" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>BASA</td><td>Privacidade controle</td><td>Relatório de feedback do TCU sobre LGPD para o Banco da Amazônia mostra trilha concreta de conformidade e lacunas em RIPD e mitigação de riscos.</td><td>TCU</td><td>Auditoria benchmark de conformidade</td><td>Alto</td><td>Muito alto</td><td><span class="chip high">Alta</span></td><td><a href="https://sites.tcu.gov.br/recursos/auditoria-sobre-lgpd/relatorios/bancos/BANCO%20DA%20AMAZ%C3%94NIA.pdf" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>Banpará</td><td>Cloud produtividade capacitação</td><td>Banpará publicou pregão e contrato ativo de R$ 39,65 mi com a Brasoftware para licenças Microsoft, Azure, segurança e treinamentos oficiais.</td><td>Microsoft,  Brasoftware</td><td>Licitação contrato de TI</td><td>Médio-alto</td><td>Alto</td><td><span class="chip high">Alta</span></td><td><a href="https://www.banpara.b.br/pregao-eletronico/pregao-eletronico-001-2024/" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>Banpará</td><td>Transformação digital</td><td>Relatórios institucionais indicam meta de aumento da presença digital e reforço do posicionamento do banco como ambiente mais ágil e digital.</td><td>Ecossistema_próprio</td><td>Diretriz institucional</td><td>Médio</td><td>Médio-alto</td><td><span class="chip medium">Média</span></td><td><a href="https://www.banpara.b.br/PortalImagens/ussmoznk/relat%C3%B3rio-de-sustentabilidade-2023-atualizado-29-11-1.pdf?mode=pad&amp;rnd=133776208791700000" target="_blank" rel="noopener noreferrer">fonte</a></td></tr><tr><td>Sicoob</td><td>IA generativa core bancário</td><td>Sicoob lançou Sisbr IA, chat conversacional integrado ao core bancário, e Pesquisa Inteligente de Normativos para mais de 62 mil colaboradores.</td><td>Llama,  DeepSeek,  Phi,  Mistral</td><td>Plataforma interna transformação digital</td><td>Altíssimo</td><td>Alto</td><td><span class="chip very-high">Muito alta</span></td><td><a href="https://www.sicoob.com.br/web/sicoob/noticias/-/asset_publisher/xAioIawpOI5S/content/id/275173922" target="_blank" rel="noopener noreferrer">fonte</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </section>
+  </div>
+</body>
+</html>
