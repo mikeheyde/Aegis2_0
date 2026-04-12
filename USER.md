@@ -5,7 +5,7 @@ _Learn about the person you're helping. Update this as you go._
 - **Name:**
 - **What to call them:** Champ
 - **Pronouns:** _(optional)_
-- **Timezone:** UTC
+- **Timezone:** America/Sao_Paulo
 - **Notes:** Competitive, outcome-focused, wants a high-performance strategic operator. Interested in technology consulting, Brazilian public sector strategy, web data gathering, and automation. Telegram approved as an operator channel for routine technical work on the local server, with confirmation reserved for sensitive or destructive actions.
 
 ## Context

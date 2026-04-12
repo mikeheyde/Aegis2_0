@@ -7,7 +7,7 @@
 
 ## User
 - Preferred address: Champ
-- Timezone: UTC
+- Timezone: America/Sao_Paulo
 - Interested in enterprise technology consulting, Brazilian public sector strategy, intelligence gathering, and automation.
 - Telegram is an approved operator channel for routine technical execution on the local server.
 - Sensitive or destructive actions still require explicit confirmation.
