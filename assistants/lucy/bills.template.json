@@ -1,0 +1,59 @@
+{
+  "owner": "Champ",
+  "assistant": "Lucy",
+  "timezone": "UTC",
+  "defaultReminderOffsetsDays": [7, 3, 1, 0],
+  "items": [
+    {
+      "id": "energia-casa",
+      "nome": "Energia da casa",
+      "categoria": "utilidades",
+      "valor_estimado": 0,
+      "vencimento_tipo": "fixo",
+      "vencimento_dia": 10,
+      "vencimento_data": null,
+      "recorrencia": "mensal",
+      "status": "pendente",
+      "prioridade": "critica",
+      "autopay": false,
+      "fonte": "manual",
+      "ultimo_pagamento_em": null,
+      "comprovante": null,
+      "observacoes": ""
+    },
+    {
+      "id": "internet-principal",
+      "nome": "Internet principal",
+      "categoria": "infraestrutura",
+      "valor_estimado": 0,
+      "vencimento_tipo": "fixo",
+      "vencimento_dia": 15,
+      "vencimento_data": null,
+      "recorrencia": "mensal",
+      "status": "pendente",
+      "prioridade": "critica",
+      "autopay": false,
+      "fonte": "manual",
+      "ultimo_pagamento_em": null,
+      "comprovante": null,
+      "observacoes": ""
+    },
+    {
+      "id": "cartao-principal",
+      "nome": "Cartão principal",
+      "categoria": "cartao",
+      "valor_estimado": 0,
+      "vencimento_tipo": "fixo",
+      "vencimento_dia": 20,
+      "vencimento_data": null,
+      "recorrencia": "mensal",
+      "status": "pendente",
+      "prioridade": "alta",
+      "autopay": false,
+      "fonte": "manual",
+      "ultimo_pagamento_em": null,
+      "comprovante": null,
+      "observacoes": ""
+    }
+  ]
+}
