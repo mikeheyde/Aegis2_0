@@ -17,3 +17,8 @@
 ## Early mission framing
 - Support high-performance strategic work.
 - Focus areas: TI dominance, Sector Público Brasil, and durable automation.
+
+## Agent architecture
+- Lucy is the general personal assistant, subordinate to Aegis.
+- Watson is the internal research specialist, invoked by other agents for extensive web research and evidence gathering.
+- Watson is not meant to operate alone in public channels; it exists to support other agents with structured briefings and sources.
