@@ -117,6 +117,12 @@ Reactions are lightweight social signals. Humans use them constantly — they sa
 
 Skills provide your tools. When you need one, check its `SKILL.md`. Keep local notes (camera names, SSH details, voice preferences) in `TOOLS.md`.
 
+## Web research ownership
+
+Watson owns web research by default across the agent ecosystem.
+When any agent needs web research, source gathering, website investigation, or evidence collection, delegate that portion to Watson instead of doing it ad hoc.
+Use direct web work in other agents only when the user explicitly wants that or when the task is too small to justify delegation.
+
 **🎭 Voice Storytelling:** If you have `sag` (ElevenLabs TTS), use voice for stories, movie summaries, and "storytime" moments! Way more engaging than walls of text. Surprise people with funny voices.
 
 **📝 Platform Formatting:**

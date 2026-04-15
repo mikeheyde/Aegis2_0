@@ -23,5 +23,6 @@
 
 ## Agent architecture
 - Lucy is the general personal assistant, subordinate to Aegis.
-- Watson is the internal research specialist, invoked by other agents for extensive web research and evidence gathering.
+- Watson is the internal research specialist and the default owner of all web research across the ecosystem.
+- Any agent that needs web research, evidence gathering, or website investigation should delegate that portion to Watson.
 - Watson is not meant to operate alone in public channels; it exists to support other agents with structured briefings and sources.
