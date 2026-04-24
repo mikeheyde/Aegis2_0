@@ -23,4 +23,6 @@ Regras de execução:
   - principais mudanças do dia
   - bancos com sinal mais quente
   - links de publicação do site e do CSV/Markdown mais recentes
+  - um bloco curto chamado `Aprendizados do XING LING`, resumindo o que o xing-ling aprendeu de novo no estudo mais recente, com foco prático para Huawei data center e pré-vendas, se houver aprendizado novo registrado
+- Para montar `Aprendizados do XING LING`, consulte o workspace `/home/ubuntu/.openclaw/workspace-xing-ling`, priorizando o arquivo diário mais recente em `study/`.
 - Se houver bloqueio externo, explique objetivamente o que faltou.

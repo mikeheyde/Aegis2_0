@@ -13,6 +13,7 @@
 - Interested in enterprise technology consulting, Brazilian public sector strategy, intelligence gathering, and automation.
 - Fan of the Miami Heat.
 - Wants reminders about Miami Heat games.
+- Wants the daily news/update report to include a short block on what XING LING learned recently, when there is new learning worth reporting.
 - Telegram is an approved operator channel for routine technical execution on the local server.
 - Sensitive or destructive actions still require explicit confirmation.
 - Para navegação e automação web, preferir `agent-browser` por padrão. Evitar Firecrawl salvo quando houver pedido explícito ou clara vantagem, porque Firecrawl consome créditos pagos.
