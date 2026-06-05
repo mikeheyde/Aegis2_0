@@ -11,7 +11,7 @@ O recorte prioriza sinais de TI, conectividade, IA, Cisco, Huawei, H3C, Fortinet
 
 ### Principais mudanças do dia
 1. **A rodada de 2026-06-05 adicionou 3 linhas novas ao CSV**, elevando a base estruturada de **55 para 58 registros** sem trocar a tese central do radar.
-2. **BASA ficou ainda mais quente**. Além do histórico recente em workloads híbridos, NGFW e hunting, o portal oficial de pregões agora deixa explícitas duas frentes novas e acionáveis: **gestão de privacidade/LGPD em SaaS (PE 90006/2026)** e **operação de infraestrutura + central de serviços de TIC (PE 90007/2026)**.
+2. **BASA concentrou o calor do radar**. O portal oficial de pregões agora deixa, na mesma vitrine pública, um stack muito claro de compras de TIC: **NGFW de data center em alta disponibilidade (PE 90011/2026)**, **gestão de privacidade/LGPD em SaaS (PE 90006/2026)** e **operação de infraestrutura + central de serviços de TIC (PE 90007/2026)**, além do eixo já conhecido de workloads híbridos e hunting.
 3. **Sicoob ganhou um reforço público mais tático em antifraude digital**. O comunicado institucional descreve detecção de chamadas em curso, bloqueio de compartilhamento remoto de tela no app e uso de **UBA com machine learning** para validar comportamento e transações.
 4. **Os demais bancos mantiveram os sinais fortes já conhecidos**, sem fato novo formal mais forte que os acréscimos acima nesta rodada.
 5. **O XING LING mudou de lossless fabric para observabilidade de serviço em CloudEngine**: o estudo mais recente entrou em **Service Telemetry no CE16800**, com foco em **RoCEv2, FabricInsight, licenciamento, resource mode e restrições operacionais**.
@@ -28,7 +28,7 @@ O recorte prioriza sinais de TI, conectividade, IA, Cisco, Huawei, H3C, Fortinet
 A base estruturada desta edição está no CSV publicado em `reports/dashboard-bancos-publicos-e-cooperativos-2026-06-05.csv`. Em relação à rodada de **2026-06-04**, a coleta de hoje **adicionou três linhas novas ao CSV**, todas lastreadas em fontes públicas e oficiais.
 
 O movimento relevante foi de **aprofundamento prático de duas teses**:
-- **BASA** deixou de ser apenas caso de edge, rede corporativa e proteção de workloads híbridos; agora também passa a expor, no mesmo front oficial de pregões, uma trilha mais madura de **LGPD/privacidade como plataforma** e outra de **sustentação operacional de TIC com service desk e operação de infraestrutura**.
+- **BASA** deixou de ser apenas caso de edge, rede corporativa e proteção de workloads híbridos; o mesmo front oficial de pregões agora combina de forma muito explícita **NGFW de data center em alta disponibilidade**, **LGPD/privacidade como plataforma** e **sustentação operacional de TIC com service desk e operação de infraestrutura**.
 - **Sicoob** reforçou de forma pública a leitura de **segurança adaptativa com IA**, saindo da camada mais estática de política cibernética e entrando numa narrativa mais acionável de **anti-scam em app, bloqueio de screen sharing e UBA com machine learning**.
 
 Sem inflar artificialmente bancos sem novidade comprovável, **Banco do Brasil, CAIXA, BRB, BNB, Banestes, Banrisul e Banpará seguem relevantes pela base recente já validada**, mas não trouxeram hoje um gatilho público mais quente que as entradas acima.
@@ -37,7 +37,7 @@ Sem inflar artificialmente bancos sem novidade comprovável, **Banco do Brasil, 
 
 | Banco | Leitura do dia | Temperatura |
 |---|---|---|
-| BASA | Continua como o caso mais quente do recorte. A agenda pública agora combina workloads híbridos, NGFW de data center, CrowdStrike, privacidade/LGPD em SaaS e operação de infraestrutura com service desk, tudo em trilhas oficiais de contratação. | **Muito alta** |
+| BASA | Continua como o caso mais quente do recorte. A agenda pública agora combina workloads híbridos, NGFW de data center em alta disponibilidade, CrowdStrike, privacidade/LGPD em SaaS e operação de infraestrutura com service desk, tudo em trilhas oficiais de contratação. | **Muito alta** |
 | Sicoob | Subiu um degrau de concretude ao adicionar, além da política cibernética e do Modo Guardião, um comunicado oficial com detecção de chamadas, bloqueio de compartilhamento de tela e UBA com machine learning para antifraude. | **Muito alta** |
 | BRB | Permanece no topo do calor por combinar investigação, capital, governança, pagamentos digitais em escala e reforço oficial de capacidade interna de TI. | **Muito alta** |
 | Banpará | Sustenta leitura muito quente com backbone, virtualização, monitoramento inteligente e avanço formal do pregão de solução integrada de poupança. | **Muito alta** |
@@ -50,7 +50,7 @@ Sem inflar artificialmente bancos sem novidade comprovável, **Banco do Brasil, 
 ## Camada TCU e controle
 
 - **BRB** segue como o principal caso de estresse regulatório e reputacional do grupo monitorado.
-- **BASA** ficou ainda mais acionável porque o mesmo portal oficial de pregões agora concentra sinais diretos de **workloads híbridos**, **NGFW**, **LGPD/privacidade em SaaS** e **service desk/infraestrutura de TIC**.
+- **BASA** ficou ainda mais acionável porque o mesmo portal oficial de pregões agora concentra sinais diretos de **workloads híbridos**, **NGFW de data center em alta disponibilidade**, **LGPD/privacidade em SaaS** e **service desk/infraestrutura de TIC**.
 - **Sicoob** ganhou densidade operacional ao combinar **política cibernética formal**, **SOC**, **segmentação**, **DLP** e agora também **antifraude com IA e bloqueio de compartilhamento de tela**.
 - **Banpará** continua forte porque combina **VMware**, **monitoramento inteligente**, **contratos Microsoft** e uma **trilha pública de avanço do core de poupança**.
 
@@ -61,7 +61,7 @@ Sem inflar artificialmente bancos sem novidade comprovável, **Banco do Brasil, 
 - O aprendizado novo do XING LING desloca a conversa de pré-vendas para **Service Telemetry em CloudEngine 16800**, útil em **AI fabric** e **storage over RoCEv2** quando a dor é observar **latência de I/O** e **throughput RDMA** de forma orientada a serviço.
 
 ### Cloud, privacidade e conectividade crítica
-- **BASA** ficou mais denso ao adicionar **gestão de privacidade e proteção de dados pessoais em SaaS** e **operação de infraestrutura com central de serviços** aos sinais já fortes de rede e segurança.
+- **BASA** ficou mais denso ao combinar **NGFW de data center em alta disponibilidade**, **gestão de privacidade e proteção de dados pessoais em SaaS** e **operação de infraestrutura com central de serviços** aos sinais já fortes de rede e segurança.
 - **BNB** continua como caso comprável de **multicloud governada**, com desenho público envolvendo provedores hyperscaler, conectividade e operação gerenciada.
 - **Banpará** mantém densidade em **core de poupança**, backbone, virtualização e monitoramento.
 - **Banestes** continua relevante como leitura estratégica de **modernização de nuvem**.
