@@ -67,7 +67,8 @@ Regras de execução:
   - existem `site/dashboard-bancos-publicos/index.html`, `site/dashboard-bancos-publicos/_headers`, `site/dashboard-bancos-publicos/.htaccess`
   - existem `site/dashboard-bancos-publicos/dashboard-bancos-publicos-latest.md` e `site/dashboard-bancos-publicos/dashboard-bancos-publicos-latest.csv`
   - o arquivo `site/dashboard-bancos-publicos/dashboard-bancos-publicos-latest.md` referencia a data da rodada atual `YYYY-MM-DD`
-- Antes de concluir a rodada, faça uma checagem textual rápida no markdown final para garantir que ele não contém marcadores proibidos nem blocos estranhos ao radar.
+- Antes de concluir a rodada, prefira `./scripts/validate_dashboard_report_content.sh YYYY-MM-DD` para a checagem textual do markdown final e aceite a checagem como concluída se ele retornar `OK`.
+- Se precisar validar manualmente, confirme que o markdown final não contém marcadores proibidos nem blocos estranhos ao radar.
 - Se esses arquivos existirem e a data da rodada atual estiver no `dashboard-bancos-publicos-latest.md`, trate a validação como concluída.
 - Ao final, entregue um resumo executivo curto com:
   - principais mudanças do dia
