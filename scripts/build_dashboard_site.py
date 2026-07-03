@@ -6,6 +6,7 @@ import re
 import unicodedata
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+from io import StringIO
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -16,6 +17,11 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 REPORT_PATTERN = 'dashboard-bancos-publicos-e-cooperativos-*.csv'
 DATE_RE = re.compile(r'dashboard-bancos-publicos-e-cooperativos-(\d{4}-\d{2}-\d{2})\.csv$')
+NON_RADAR_PATTERNS = (
+    re.compile(r'(?im)^\s{0,3}#+\s+daily\s+.*reference\s*$'),
+    re.compile(r'(?im)\bcrucifix(?:ion)?\b'),
+    re.compile(r'(?im)\b(?:joyful|sorrowful|glorious|luminous)\s+mysteries\b'),
+)
 
 WATCHLIST = [
     {'label': 'Cisco', 'aliases': ['cisco']},
@@ -35,6 +41,14 @@ WATCHLIST = [
     {'label': 'Logicalis', 'aliases': ['logicalis']},
     {'label': 'Teltec', 'aliases': ['teltec']},
     {'label': 'Teletex', 'aliases': ['teletex']},
+]
+
+TARGET_BANKS = [
+    'Banco do Brasil',
+    'CAIXA',
+    'BRB',
+    'Sicoob',
+    'Banco Central',
 ]
 
 
@@ -92,6 +106,19 @@ def parse_report_date(path: Path):
     return datetime.strptime(match.group(1), '%Y-%m-%d').date()
 
 
+def validate_report_markdown(path: Path) -> str:
+    content = path.read_text(encoding='utf-8')
+    for pattern in NON_RADAR_PATTERNS:
+        match = pattern.search(content)
+        if match:
+            excerpt = match.group(0).strip().splitlines()[0][:120]
+            raise SystemExit(
+                f'Conteudo alheio ao radar detectado em {path.name}: "{excerpt}". '
+                'Saneie o markdown antes de publicar o dashboard.'
+            )
+    return content
+
+
 def within_window(row, days: int, anchor_date) -> bool:
     first_seen = datetime.strptime(row['__first_seen'], '%Y-%m-%d').date()
     delta = (anchor_date - first_seen).days
@@ -113,6 +140,7 @@ report_date = latest_report_date_obj.isoformat()
 latest_md = REPORTS_DIR / f'dashboard-bancos-publicos-e-cooperativos-{report_date}.md'
 if not latest_md.exists():
     raise SystemExit(f'Markdown correspondente não encontrado: {latest_md.name}')
+latest_md_text = validate_report_markdown(latest_md)
 
 history_start_date_obj = latest_report_date_obj - timedelta(days=MAX_HISTORY_DAYS - 1)
 history_csv_candidates = [
@@ -131,6 +159,8 @@ for report_dt, report_csv in history_csv_candidates:
         reader = csv.DictReader(f)
         for row in reader:
             cleaned_row = {key: (value or '').strip() for key, value in row.items()}
+            if cleaned_row.get('Banco', '') not in TARGET_BANKS:
+                continue
             companies = [part.strip() for part in cleaned_row['Empresas_citadas'].split(';') if part.strip()]
             normalized_text = normalize_text(' '.join(str(value) for value in cleaned_row.values()))
             matched_vendors = [
@@ -174,7 +204,7 @@ rows = sorted(
 default_rows = [row for row in rows if within_window(row, DEFAULT_WINDOW_DAYS, latest_report_date_obj)]
 
 priority_counts = Counter(row['Prioridade'] for row in rows)
-banks = sorted({row['Banco'] for row in rows})
+banks = TARGET_BANKS[:]
 bank_counts = Counter(row['Banco'] for row in rows)
 watchlist_counts = Counter(vendor for row in rows for vendor in row['__vendors'])
 company_counts = Counter(company for row in rows for company in row['__companies'])
@@ -190,12 +220,35 @@ window_counts = {
 }
 
 cards = [
-    ('Bancos monitorados', str(len({row['Banco'] for row in default_rows}))),
+    ('Bancos monitorados', str(len(TARGET_BANKS))),
     ('Matérias catalogadas', str(len(default_rows))),
     ('Vendors com sinal', str(sum(1 for vendor in WATCHLIST if default_watchlist_counts[vendor['label']] > 0))),
     ('Prioridade muito alta', str(default_priority_counts['Muito alta'])),
     ('Prioridade alta', str(default_priority_counts['Alta'])),
 ]
+
+
+def bank_summary_text(bank: str, recent_rows) -> str:
+    if not recent_rows:
+        return f'<li><strong>{html.escape(bank)}</strong> permanece no recorte, mas sem matéria catalogada na janela atual.</li>'
+
+    top_row = sorted(
+        recent_rows,
+        key=lambda row: (
+            priority_rank(row['Prioridade']),
+            -datetime.strptime(row['__last_seen'], '%Y-%m-%d').date().toordinal(),
+            row['Tema'],
+        ),
+    )[0]
+    impact = top_row.get('Impacto_estrategico', '').strip()
+    risk = top_row.get('Risco_regulatorio_controle', '').strip()
+    details = []
+    if impact:
+        details.append(f'impacto {impact.lower()}')
+    if risk:
+        details.append(f'risco {risk.lower()}')
+    suffix = f" com {' e '.join(details)}" if details else ''
+    return f'<li><strong>{html.escape(bank)}</strong> aparece com destaque em <strong>{html.escape(top_row["Tema"])}</strong>{suffix}.</li>'
 
 
 def chip_class(value: str) -> str:
@@ -257,6 +310,19 @@ for days, label in WINDOW_OPTIONS:
     window_filter_buttons.append(
         f'<button class="filter-chip{active_class}" type="button" data-filter-kind="window" data-filter-value="{days}">{html.escape(label)} <span data-count-kind="window" data-count-value="{days}">{window_counts[days]}</span></button>'
     )
+
+summary_banks = sorted(
+    TARGET_BANKS,
+    key=lambda bank: (
+        priority_rank(next((row['Prioridade'] for row in default_rows if row['Banco'] == bank), 'Baixa')),
+        -default_bank_counts[bank],
+        bank,
+    ),
+)
+summary_items = '\n          '.join(
+    bank_summary_text(bank, [row for row in default_rows if row['Banco'] == bank])
+    for bank in summary_banks
+)
 
 bank_list_items = []
 for bank in banks:
@@ -777,8 +843,8 @@ html_doc = f'''<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Radar estratégico, bancos públicos e cooperativismo financeiro</title>
-  <meta name="description" content="Radar executivo com foco em tecnologia, IA, conectividade, transformação digital, canais, pagamentos, privacidade, governança e compras de TI em bancos públicos e cooperativas financeiras.">
+  <title>Radar estratégico, Banco do Brasil, CAIXA, BRB, Sicoob e Banco Central</title>
+  <meta name="description" content="Radar executivo com foco em tecnologia, IA, conectividade, transformação digital, canais, pagamentos, privacidade, governança e compras de TI em Banco do Brasil, CAIXA, BRB, Sicoob e Banco Central.">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; script-src 'self'; style-src 'self'; connect-src 'self'; font-src 'self' data:; manifest-src 'self'; upgrade-insecure-requests">
   <link rel="stylesheet" href="style.css">
@@ -787,8 +853,8 @@ html_doc = f'''<!doctype html>
   <div class="wrap">
     <section class="hero">
       <div class="meta">Atualizado em {html.escape(build_timestamp)} · histórico de entradas no dashboard carregado de {html.escape(history_loaded_since)} até {html.escape(report_date)} (máx. 1 ano) · atualização diária programada</div>
-      <h1>Radar estratégico, bancos públicos, regionais e cooperativismo financeiro</h1>
-      <div class="subtitle">Painel executivo com foco em tecnologia, IA, conectividade, transformação digital, canais, pagamentos, privacidade, governança, compras de TI e vendors críticos para bancos públicos, regionais e cooperativas financeiras.</div>
+      <h1>Radar estratégico: Banco do Brasil, CAIXA, BRB, Sicoob e Banco Central</h1>
+      <div class="subtitle">Painel executivo com foco em tecnologia, IA, conectividade, transformação digital, canais, pagamentos, privacidade, governança, compras de TI e vendors críticos dentro do recorte atual do workspace.</div>
       <div class="downloads">
         <a class="btn" href="{aggregate_csv_name}" download>Baixar CSV acumulado (1 ano)</a>
         <a class="btn" href="dashboard-bancos-publicos-latest.csv" download>Baixar CSV da rodada mais recente</a>
@@ -814,12 +880,7 @@ html_doc = f'''<!doctype html>
         <h3>Vendors citados na base</h3>
         <ul class="bank-list">{observed_company_list}</ul>
         <h3>Resumo executivo</h3>
-        <ul class="summary-list">
-          <li><strong>Banco do Brasil</strong> segue quente em conectividade e IA aplicada a pagamentos.</li>
-          <li><strong>CAIXA</strong> concentra sinal forte em inclusão, pagamentos offline e contratação de IA jurídica.</li>
-          <li><strong>BNB</strong> aparece bem em modernização de canais, Open Finance e agenda de privacidade.</li>
-          <li><strong>Sicoob</strong> mostra maturidade superior em IA generativa integrada ao core bancário.</li>
-        </ul>
+        <ul class="summary-list">{summary_items}</ul>
         <h3>Recorte por fornecedor</h3>
         <ul class="summary-list">{vendor_summary_items}</ul>
         <div class="small security-note">Site endurecido para publicação estática com CSP, políticas de navegação restritivas, links externos com isolamento e cabeçalhos de segurança gerados junto do build.</div>
@@ -925,15 +986,37 @@ with aggregate_csv_path.open('w', newline='', encoding='utf-8') as f:
             'Fonte': row['Fonte'],
         })
 
+latest_filtered_csv_buffer = StringIO()
+with latest_csv.open(newline='', encoding='utf-8') as f:
+    reader = csv.DictReader(f)
+    fieldnames = reader.fieldnames or []
+    writer = csv.DictWriter(latest_filtered_csv_buffer, fieldnames=fieldnames, lineterminator='\n')
+    writer.writeheader()
+    for row in reader:
+        if (row.get('Banco') or '').strip() not in TARGET_BANKS:
+            continue
+        writer.writerow(row)
+latest_filtered_csv_text = latest_filtered_csv_buffer.getvalue()
+
+latest_filtered_md = f'''# Radar estratégico filtrado - {report_date}
+
+Recorte atual do workspace aplicado em {build_timestamp}.
+
+- Bancos monitorados: Banco do Brasil, CAIXA, BRB, Sicoob e Banco Central.
+- Este arquivo resume o escopo atual do site e evita reapresentar instituições que saíram do radar.
+- O relatório textual integral da rodada permanece preservado em `{latest_md.name}`.
+- O CSV filtrado desta rodada está em `dashboard-bancos-publicos-latest.csv`.
+'''
+
 (OUT_DIR / 'index.html').write_text(html_doc, encoding='utf-8')
 (OUT_DIR / 'style.css').write_text(style_css.strip() + '\n', encoding='utf-8')
 (OUT_DIR / 'app.js').write_text(app_js.strip() + '\n', encoding='utf-8')
 (OUT_DIR / '_headers').write_text(headers_content, encoding='utf-8')
 (OUT_DIR / '.htaccess').write_text(htaccess_content, encoding='utf-8')
 (OUT_DIR / latest_csv.name).write_text(latest_csv.read_text(encoding='utf-8'), encoding='utf-8')
-(OUT_DIR / latest_md.name).write_text(latest_md.read_text(encoding='utf-8'), encoding='utf-8')
-(OUT_DIR / 'dashboard-bancos-publicos-latest.csv').write_text(latest_csv.read_text(encoding='utf-8'), encoding='utf-8')
-(OUT_DIR / 'dashboard-bancos-publicos-latest.md').write_text(latest_md.read_text(encoding='utf-8'), encoding='utf-8')
+(OUT_DIR / latest_md.name).write_text(latest_md_text, encoding='utf-8')
+(OUT_DIR / 'dashboard-bancos-publicos-latest.csv').write_text(latest_filtered_csv_text, encoding='utf-8')
+(OUT_DIR / 'dashboard-bancos-publicos-latest.md').write_text(latest_filtered_md, encoding='utf-8')
 
 print(json.dumps({
     'out_dir': str(OUT_DIR),
