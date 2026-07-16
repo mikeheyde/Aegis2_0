@@ -1,8 +1,8 @@
-# Radar estratégico filtrado - 2026-07-15
+# Radar estratégico filtrado - 2026-07-16
 
-Recorte atual do workspace aplicado em 2026-07-15 07:08 UTC.
+Recorte atual do workspace aplicado em 2026-07-16 07:06 UTC.
 
 - Bancos monitorados: Banco do Brasil, CAIXA, BRB, Sicoob e Banco Central.
 - Este arquivo resume o escopo atual do site e evita reapresentar instituições que saíram do radar.
-- O relatório textual integral da rodada permanece preservado em `dashboard-bancos-publicos-e-cooperativos-2026-07-15.md`.
+- O relatório textual integral da rodada permanece preservado em `dashboard-bancos-publicos-e-cooperativos-2026-07-16.md`.
 - O CSV filtrado desta rodada está em `dashboard-bancos-publicos-latest.csv`.
